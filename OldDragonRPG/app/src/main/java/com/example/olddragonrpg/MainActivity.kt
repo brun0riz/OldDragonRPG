@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import com.example.olddragonrpg.controller.CharacterCreationViewModel
 import com.example.olddragonrpg.ui.theme.OldDragonRPGTheme // Use your actual theme name
 import com.example.olddragonrpg.view.CharacterCreationScreen
+import com.example.olddragonrpg.view.HideSystemBars
 
 class MainActivity : ComponentActivity() {
 
@@ -20,7 +21,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            OldDragonRPGTheme { // This is your project's theme Composable
+            OldDragonRPGTheme {
+                HideSystemBars() // Hide the system bar
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

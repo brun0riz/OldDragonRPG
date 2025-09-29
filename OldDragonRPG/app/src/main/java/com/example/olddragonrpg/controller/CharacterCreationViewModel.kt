@@ -3,6 +3,7 @@ package com.example.olddragonrpg.controller
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.room.util.copy
 import com.example.olddragonrpg.model.*
 import kotlin.reflect.KClass
 
@@ -54,7 +55,7 @@ class CharacterCreationViewModel : ViewModel() {
     // --- Functions the UI will call ---
 
     fun setName(name: String) {
-        player.value.name = name
+        player.value = player.value.copy(name = name)
     }
 
     // A simple function for buttons that just move to the next linear step
@@ -67,7 +68,6 @@ class CharacterCreationViewModel : ViewModel() {
         }
     }
 
-    // UPDATED: This now contains the full logic for all 3 methods
     fun selectAttributeMethod(method: String) {
         val d6 = D6()
         if (method == "Clássico") {
@@ -86,11 +86,10 @@ class CharacterCreationViewModel : ViewModel() {
             currentStep.value = CreationStep.ATTRIBUTE_ASSIGNMENT // Go to our new screen
         }
     }
-
+    // Always important to never change a property of the object
     fun selectRace(race: Race) {
-        player.value.race = race
-        player.value.characterClass = null // Clear class in case it's not allowed by new race
-        proceedToNextStep() // Move from RACE to CLASS
+        player.value = player.value.copy(race = race, characterClass = null)
+        proceedToNextStep()
     }
 
     fun selectClass(kClass: KClass<out CharacterClass>) {
@@ -101,17 +100,13 @@ class CharacterCreationViewModel : ViewModel() {
             Mage::class -> Mage()
             else -> throw IllegalStateException("Classe desconhecida")
         }
-        player.value.characterClass = newClass
-        currentStep.value = CreationStep.SUMMARY // Move to the final summary
+        player.value = player.value.copy(characterClass = newClass)
+        currentStep.value = CreationStep.SUMMARY
     }
 
 
     // --- NEW FUNCTIONS for Attribute Assignment ---
 
-    /**
-     * Assigns a specific roll to an attribute, updating the lists of
-     * assigned and unassigned values.
-     */
     fun assignRoll(attributeName: String, roll: Int) {
         // If the attribute was already assigned, put its old value back in the unassigned list
         if (assignedAttributes.containsKey(attributeName)) {
@@ -122,13 +117,9 @@ class CharacterCreationViewModel : ViewModel() {
         unassignedRolls.value = (unassignedRolls.value - roll).sortedDescending()
     }
 
-    /**
-     * Called when the user confirms their attribute choices.
-     * It builds the final Attributes object and moves to the next step.
-     */
     fun confirmAttributeAssignments() {
         if (assignedAttributes.size == 6) {
-            player.value.attributes = Attributes(
+            val newAttributes = Attributes(
                 strength = assignedAttributes["Força"]!!,
                 dexterity = assignedAttributes["Destreza"]!!,
                 constitution = assignedAttributes["Constituição"]!!,
@@ -136,8 +127,9 @@ class CharacterCreationViewModel : ViewModel() {
                 wisdom = assignedAttributes["Sabedoria"]!!,
                 charisma = assignedAttributes["Carisma"]!!
             )
-            // Proceed to the next step in the creation process
+            player.value = player.value.copy(attributes = newAttributes)
             currentStep.value = CreationStep.RACE
         }
     }
+
 }

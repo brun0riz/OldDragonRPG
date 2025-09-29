@@ -26,8 +26,6 @@ data class Attributes(
         fun rollAdventurerValues(d6: D6): List<Int> {
             return List(6) { d6.roll(3).sum() }
         }
-
-        // REFACTORED: Just return the rolled values.
         fun rollHeroicValues(d6: D6): List<Int> {
             val rolls = mutableListOf<Int>()
             repeat(6) {
